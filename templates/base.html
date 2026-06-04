@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Municipality of Carigara, Leyte - Disaster Early Warning System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/prod.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    <style>
+        .site-wrap { position: relative; min-height: 100vh; }
+        .site-wrap::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("{% static 'images/bg.jpg' %}");
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            opacity: 0.40; /* stronger visible background */
+            filter: saturate(1.15) brightness(1.05);
+            z-index: 0;
+            pointer-events: none;
+            will-change: opacity;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+        /* Ensure page content sits above the background and keeps its own opaque backgrounds */
+        .site-wrap > * { position: relative; z-index: 1; }
+        /* Make page containers allow the background to show through */
+        .site-wrap .container,
+        .site-wrap .container-fluid {
+            background: transparent !important;
+        }
+
+        /* Default cards: translucent with subtle blur to improve readability while showing bg */
+        .site-wrap .card {
+            background: rgba(15,20,25,0.10) !important;
+            border-color: rgba(0,188,212,0.08) !important;
+            backdrop-filter: blur(6px);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+    </style>
+</head>
+<body class="prod">
+    <div class="site-wrap">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Carigara%2C_Leyte_Official_Seal.png" alt="Municipality of Carigara official seal" class="brand-logo mr-2" style="height: 60px; width: auto; object-fit: contain;">
+                <span class="brand-text">Municipality of Carigara, Leyte</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_list' %}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_activity' %}">Activity</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                            <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'logout' %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-4">
+        {% if messages %}
+        <div class="container-fluid">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer py-4 mt-5">
+        <div class="container-fluid text-center">
+            <p class="mb-0">&copy; 2026 The Municipality of Carigara, Leyte - Disaster Early Warning System</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+
+    <script>
+    (function () {
+        function scrollToTarget(id) {
+            try {
+                var el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) { console.warn('scrollToTarget error', e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach behavior to any filter form with this class
+            var forms = document.querySelectorAll('.advanced-filter-form');
+            forms.forEach(function (form) {
+                var target = form.getAttribute('data-scroll-target') || 'recent-incidents';
+
+                // On submit, set the persistent hash so it survives redirects
+                form.addEventListener('submit', function () {
+                    try { window.location.hash = '#' + target; } catch (e) {}
+                });
+
+                // Only set the hash on explicit submit (Apply Filters)
+            });
+
+            // On load, if there's a hash, attempt to scroll to it
+            try {
+                var hash = window.location.hash && window.location.hash.replace('#', '');
+                if (hash) {
+                    // small delay to allow server-rendered content to layout
+                    setTimeout(function () { scrollToTarget(hash); }, 120);
+                }
+            } catch (e) { /* noop */ }
+
+            // Password visibility toggle for password inputs
+            var toggleButtons = document.querySelectorAll('.password-toggle');
+            toggleButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    try {
+                        var wrapper = button.closest('.password-toggle-wrapper');
+                        if (!wrapper) return;
+                        var input = wrapper.querySelector('input[type="password"], input[type="text"]');
+                        if (!input) return;
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                        } else {
+                            input.type = 'password';
+                            button.innerHTML = '<i class="fas fa-eye"></i>';
+                        }
+                    } catch (e) {
+                        console.warn('Password toggle error', e);
+                    }
+                });
+            });
+        });
+    })();
+    </script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome - Municipality of Carigara, Leyte{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-7 mb-4">
+            <div class="p-4 rounded shadow-lg" style="background: rgba(15, 20, 25, 0.16); border: 1px solid rgba(0,188,212,0.08); backdrop-filter: blur(6px);">
+                <p class="text-uppercase mb-2" style="letter-spacing: 0.2em; color: var(--primary); font-weight: 700;">Municipality of Carigara, Leyte</p>
+                <h1 class="display-4 mb-3">Disaster Early Warning System</h1>
+                <p class="lead text-muted mb-4">Stay ready with real-time hazard monitoring, incident reporting, and secure early warning management for the local community.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg text-light" style="border-color: rgba(0,188,212,0.35);">
+                        <i class="fas fa-user-plus"></i> Register
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="p-4 rounded shadow-lg" style="background: rgba(26, 35, 50, 0.14); border: 1px solid rgba(0,188,212,0.08); backdrop-filter: blur(6px);">
+                <h4 class="mb-3">What you get before login</h4>
+                <ul class="list-unstyled text-muted" style="line-height: 1.8;">
+                    <li><i class="fas fa-check-circle text-primary me-2"></i> Public hazard status overview</li>
+                    <li><i class="fas fa-check-circle text-primary me-2"></i> Secure access for administrators and dispatchers</li>
+                    <li><i class="fas fa-check-circle text-primary me-2"></i> Incident reports with media evidence</li>
+                    <li><i class="fas fa-check-circle text-primary me-2"></i> Role-based data protection and auditing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 gy-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0" style="background: rgba(15, 20, 25, 0.12); backdrop-filter: blur(6px);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-bell text-primary me-2"></i> Early Warnings</h5>
+                    <p class="card-text text-muted">Publish alerts quickly to keep the community informed during emergencies.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0" style="background: rgba(15, 20, 25, 0.12); backdrop-filter: blur(6px);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-map-marker-alt text-primary me-2"></i> Incident Reporting</h5>
+                    <p class="card-text text-muted">Log incidents with location, priority, and supporting images.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0" style="background: rgba(15, 20, 25, 0.12); backdrop-filter: blur(6px);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-shield-alt text-primary me-2"></i> Secure Login</h5>
+                    <p class="card-text text-muted">Django-Axes protects accounts from brute-force attacks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0" style="background: rgba(15, 20, 25, 0.12); backdrop-filter: blur(6px);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users text-primary me-2"></i> Access Control</h5>
+                    <p class="card-text text-muted">Different roles see only the incidents and tools they need.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

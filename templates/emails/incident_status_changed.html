@@ -1,0 +1,16 @@
+<html>
+  <body style="font-family: Arial, sans-serif; background: #f5f7fa; color: #333;">
+    <div style="max-width:600px;margin:24px auto;padding:20px;background:white;border-radius:6px;border:1px solid #e1e8ee;">
+      <h2 style="margin-top:0;color:#0b5ed7;">Incident status updated</h2>
+      <p><strong>{{ incident.title }}</strong></p>
+      <p>Status changed from <em>{{ old_status }}</em> to <strong>{{ incident.get_status_display }}</strong></p>
+      <p>Priority: {{ incident.priority }} &nbsp;•&nbsp; Type: {{ incident.get_incident_type_display }}</p>
+      <p>Reported by: {% if reported_by %}{{ reported_by.get_full_name|default:reported_by.username }}{% else %}Unknown{% endif %}</p>
+      {% if incident_url %}
+      <p><a href="{{ incident_url }}" style="display:inline-block;padding:10px 14px;background:#0b5ed7;color:#fff;text-decoration:none;border-radius:4px;">View incident</a></p>
+      {% endif %}
+      <hr style="border:none;border-top:1px solid #eef2f6;margin:18px 0;">
+      <p style="font-size:0.9rem;color:#6c757d;">This is an automated message from Carigara incident management system.</p>
+    </div>
+  </body>
+</html>

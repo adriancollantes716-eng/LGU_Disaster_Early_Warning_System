@@ -1,0 +1,210 @@
+#!/usr/bin/env python
+"""
+Demo data setup script for Municipality of Carigara.
+Creates demo users and sample incidents.
+"""
+import os
+
+import django
+from django.contrib.auth import get_user_model
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'carigara.settings')
+django.setup()
+
+from accounts.demo import DEMO_PASSWORD, DEMO_USERS
+from axes.models import AccessAttempt
+from incidents.models import Hazard, Incident, Sensor
+
+User = get_user_model()
+
+
+def clear_login_lockouts():
+    try:
+        deleted_count, _ = AccessAttempt.objects.all().delete()
+        print(f"Cleared {deleted_count} login lockout record(s).")
+    except Exception as e:
+        print(f"Could not clear login lockout records: {e}")
+
+
+def create_demo_users():
+    print("Creating demo users...")
+    clear_login_lockouts()
+
+    for user_data in DEMO_USERS:
+        username = user_data['username']
+        try:
+            user = User.objects.filter(username=username).first()
+            created = user is None
+            if created:
+                user = User(username=username)
+
+            user.email = user_data['email']
+            user.role = user_data['role']
+            user.first_name = user_data['first_name']
+            user.last_name = user_data['last_name']
+            user.is_active = True
+            user.is_superuser = user_data['is_superuser']
+            user.is_staff = user_data['is_staff']
+            user.set_password(DEMO_PASSWORD)
+            user.save()
+
+            action = 'created' if created else 'already existed; password reset'
+            print(f"OK {username.capitalize()} user {action}: {username}/{DEMO_PASSWORD}")
+        except Exception as e:
+            print(f"Error creating or updating {username}: {e}")
+
+    print("\nDemo user passwords are now set to 'password123'.")
+
+
+def create_demo_sensors():
+    print("\nCreating demo sensors...")
+
+    sensors_data = [
+        {
+            'name': 'Carigara Municipal Earthquake Sensor',
+            'sensor_type': 'earthquake',
+            'latitude': 11.1850,
+            'longitude': 124.9165,
+            'location_description': 'Municipal Hall Area, Carigara, Leyte',
+            'contact_info': 'seismic@carigara-leyte.gov.ph',
+        },
+        {
+            'name': 'Carigara Flood Monitoring Station',
+            'sensor_type': 'flood',
+            'latitude': 11.1904,
+            'longitude': 124.9202,
+            'location_description': 'Low-Lying Residential Area, Carigara, Leyte',
+            'contact_info': 'flood@carigara-leyte.gov.ph',
+        },
+        {
+            'name': 'Carigara Landslide Detection System',
+            'sensor_type': 'landslide',
+            'latitude': 11.1768,
+            'longitude': 124.9098,
+            'location_description': 'Upland Monitoring Zone, Carigara, Leyte',
+            'contact_info': 'geological@carigara-leyte.gov.ph',
+        },
+    ]
+
+    for sensor_data in sensors_data:
+        try:
+            sensor, created = Sensor.objects.get_or_create(
+                name=sensor_data['name'],
+                defaults=sensor_data,
+            )
+            if created:
+                print(f"OK Sensor created: {sensor.name}")
+            else:
+                print(f"Sensor already exists: {sensor.name}")
+        except Exception as e:
+            print(f"Error creating sensor: {e}")
+
+
+def create_demo_hazards():
+    print("\nCreating demo hazards...")
+
+    hazard_data = [
+        {
+            'name': 'Carigara Earthquake Alert',
+            'hazard_type': 'earthquake',
+            'alert_level': 'yellow',
+            'description': 'Low-magnitude seismic activity detected',
+        },
+        {
+            'name': 'Carigara Flood Warning',
+            'hazard_type': 'flood',
+            'alert_level': 'orange',
+            'description': 'Water levels rising due to continuous rainfall',
+        },
+        {
+            'name': 'Carigara Landslide Risk',
+            'hazard_type': 'landslide',
+            'alert_level': 'green',
+            'description': 'Stable conditions - routine monitoring continues',
+        },
+    ]
+
+    for hazard in hazard_data:
+        try:
+            item, created = Hazard.objects.get_or_create(
+                name=hazard['name'],
+                defaults=hazard,
+            )
+            if created:
+                print(f"OK Hazard created: {item.name} ({item.get_alert_level_display()})")
+            else:
+                print(f"Hazard already exists: {item.name}")
+        except Exception as e:
+            print(f"Error creating hazard: {e}")
+
+
+def create_demo_incidents():
+    print("\nCreating demo incidents...")
+
+    dispatcher = User.objects.filter(role='dispatcher').first()
+    incident_data = [
+        {
+            'title': 'Earthquake Tremor Reported in Carigara',
+            'description': 'Residents reported mild tremor around 2:15 AM in Carigara, Leyte',
+            'incident_type': 'earthquake',
+            'status': 'confirmed',
+            'latitude': 11.1850,
+            'longitude': 124.9165,
+            'location_description': 'Municipal Hall Area, Carigara, Leyte',
+            'priority': 2,
+            'reported_by_role': 'dispatcher',
+        },
+        {
+            'title': 'Admin-created Flood Response Assigned to Dispatcher',
+            'description': 'This incident was created by the admin and assigned to the dispatcher for follow-up.',
+            'incident_type': 'flood',
+            'status': 'investigating',
+            'latitude': 11.1904,
+            'longitude': 124.9202,
+            'location_description': 'Poblacion, Carigara, Leyte',
+            'priority': 4,
+            'reported_by_role': 'admin',
+            'assign_to_dispatcher': True,
+        },
+    ]
+
+    for incident in incident_data:
+        try:
+            if not dispatcher:
+                print("Skipping incident creation: no dispatcher user found")
+                return
+
+            if incident.pop('reported_by_role') == 'admin':
+                reporter = User.objects.filter(role='admin').first() or dispatcher
+            else:
+                reporter = dispatcher
+            incident['reported_by'] = reporter
+
+            if incident.pop('assign_to_dispatcher', False):
+                incident['assigned_to'] = dispatcher
+
+            item, created = Incident.objects.get_or_create(
+                title=incident['title'],
+                defaults=incident,
+            )
+            if created:
+                print(f"OK Incident created: {item.title}")
+            else:
+                print(f"Incident already exists: {item.title}")
+        except Exception as e:
+            print(f"Error creating incident: {e}")
+
+
+create_demo_users()
+create_demo_sensors()
+create_demo_hazards()
+create_demo_incidents()
+
+print("\nOK Demo data setup complete!")
+print("\nDemo Credentials:")
+print("  Superuser: superadmin / password123")
+print("  Admin User: admin / password123")
+print("  Dispatcher: dispatcher / password123")
+print("  Public Viewer: viewer / password123")
+print("\nStart the development server with:")
+print("  python manage.py runserver")

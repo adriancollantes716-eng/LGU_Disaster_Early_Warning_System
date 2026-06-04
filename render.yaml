@@ -1,0 +1,35 @@
+databases:
+  - name: carigara-ew-db
+    databaseName: carigara_ew
+    user: carigara_ew
+
+services:
+  - type: web
+    name: carigara-ew-leyte
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "python manage.py migrate --noinput && python setup_demo_data.py && gunicorn carigara.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: carigara-ew-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://carigara-ew-leyte.onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://carigara-ew-leyte.onrender.com"
+      - key: CLOUDINARY_CLOUD_NAME
+        value: "dpjhmjhtv"
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

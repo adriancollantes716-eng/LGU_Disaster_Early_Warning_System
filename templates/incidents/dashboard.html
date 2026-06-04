@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Municipality of Carigara, Leyte Early Warning Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .dashboard-header .page-meta {
+        color: #a0aab5;
+        font-size: 0.95rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-auto-rows: minmax(160px, auto);
+        gap: 1rem;
+    }
+
+    .stat-card,
+    .dashboard-card {
+        border: 1px solid rgba(0, 188, 212, 0.25);
+        background: rgba(26, 35, 50, 0.92);
+        border-radius: 14px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .stat-card:hover,
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(0, 188, 212, 0.45);
+        box-shadow: 0 24px 55px rgba(0, 0, 0, 0.18);
+    }
+
+    .stat-card {
+        padding: 1.75rem 1.5rem;
+        text-align: center;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .stat-card-number {
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: #00bcd4;
+        margin: 0;
+    }
+
+    .stat-card-label {
+        color: #a0aab5;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .dashboard-card .card-header {
+        background: transparent;
+        border-bottom: none;
+        padding: 1.4rem 1.5rem 0;
+    }
+
+    .dashboard-card .card-header h5 {
+        color: #00bcd4;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .card-body.filter-panel {
+        background: rgba(26, 35, 50, 0.98) !important;
+        border-top: 1px solid rgba(0, 188, 212, 0.18);
+        padding: 1.5rem;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .filter-field {
+        grid-column: span 6;
+        min-width: 0;
+    }
+
+    .filter-field-wide {
+        grid-column: span 12;
+    }
+
+    .filter-field label,
+    .filter-field legend {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: #a0aab5 !important;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .filter-checks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .filter-check {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.4rem;
+        margin: 0;
+        padding: 0.45rem 0.85rem;
+        border: 1px solid rgba(0, 188, 212, 0.35) !important;
+        border-radius: 0.55rem;
+        background: rgba(37, 45, 61, 0.92) !important;
+        color: #e8f0f5 !important;
+        font-size: 0.92rem;
+        line-height: 1.25;
+        cursor: pointer;
+        transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .filter-check:hover {
+        background: #00bcd4 !important;
+        color: #000 !important;
+    }
+
+    .filter-check input {
+        margin-right: 0.45rem;
+    }
+
+    .filter-range {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0, 188, 212, 0.2);
+    }
+
+    .filter-actions-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+
+    .filter-errors {
+        margin-top: 0.45rem;
+        color: #ff6b6b;
+        font-size: 0.85rem;
+    }
+
+    .hazard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .hazard-card {
+        border-radius: 14px;
+        padding: 1.35rem;
+        text-align: left;
+        background: rgba(37, 45, 61, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hazard-card .badge {
+        display: inline-flex;
+        font-size: 0.95rem;
+        padding: 0.65rem 0.95rem;
+        font-weight: 700;
+        border-radius: 999px;
+    }
+
+    .hazard-card p {
+        margin: 0.8rem 0 0.2rem 0;
+    }
+
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .table-card .table thead th {
+        color: #00bcd4;
+        border-bottom: 1px solid rgba(0, 188, 212, 0.25);
+    }
+
+    .table-card .table-hover tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    @media (max-width: 991.98px) {
+        .filter-field {
+            grid-column: span 12;
+        }
+
+        .filter-range {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions,
+        .filter-actions-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+    }
+
+    .quick-action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .quick-action-buttons .btn-quick {
+        min-width: 165px;
+        color: #00bcd4;
+        background: rgba(0, 188, 212, 0.12);
+        border: 1px solid rgba(0, 188, 212, 0.35);
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .quick-action-buttons .btn-quick:hover,
+    .quick-action-buttons .btn-quick:focus {
+        background: #00bcd4;
+        color: #000;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="py-5">
+    <div class="container-fluid">
+        <div class="dashboard-header mb-4">
+            <div>
+                <h1 class="section-title"><i class="fas fa-bell" style="color: #00bcd4;"></i> Early Warning Dashboard</h1>
+                <p class="page-meta mb-0">Live incident summary, hazard levels, and quick response action links.</p>
+            </div>
+            <div class="page-meta">Updated as data is received from the field</div>
+        </div>
+        {% if user.is_superuser or user.role == 'admin' or user.role == 'dispatcher' %}
+        <div class="quick-action-buttons">
+            <a class="btn btn-quick" href="{% url 'incident_create' %}?incident_type=earthquake">
+                <i class="fas fa-bolt me-1"></i> Earthquake
+            </a>
+            <a class="btn btn-quick" href="{% url 'incident_create' %}?incident_type=flood">
+                <i class="fas fa-water me-1"></i> Flood
+            </a>
+            <a class="btn btn-quick" href="{% url 'incident_create' %}?incident_type=landslide">
+                <i class="fas fa-mountain me-1"></i> Landslide
+            </a>
+            <a class="btn btn-quick" href="{% url 'incident_create' %}?incident_type=typhoon">
+                <i class="fas fa-wind me-1"></i> Typhoon
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="dashboard-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-card-label"><i class="fas fa-exclamation-circle"></i> Total Incidents</div>
+                <div class="stat-card-number">{{ stats.total_incidents }}</div>
+                <div class="page-meta">All recorded incidents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label"><i class="fas fa-check-circle"></i> Confirmed</div>
+                <div class="stat-card-number" style="color: #28a745;">{{ stats.confirmed }}</div>
+                <div class="page-meta">Verified and validated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label"><i class="fas fa-hourglass-half"></i> Unresolved</div>
+                <div class="stat-card-number" style="color: #ffc107;">{{ stats.unresolved }}</div>
+                <div class="page-meta">Awaiting response</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label"><i class="fas fa-check-double"></i> Resolved</div>
+                <div class="stat-card-number" style="color: #17a2b8;">{{ stats.resolved }}</div>
+                <div class="page-meta">Closed incidents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label"><i class="fas fa-fire"></i> High Priority</div>
+                <div class="stat-card-number" style="color: #ff6b6b;">{{ stats.high_priority }}</div>
+                <div class="page-meta">Critical incidents</div>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mb-4">
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-alert-circle"></i> Hazard Alert Levels</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="hazard-grid">
+                            <div class="hazard-card" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.08);">
+                                <span class="badge" style="background: #dc3545; color: white;">RED</span>
+                                <p style="color: #e8f0f5; font-weight: 700;">{{ hazard_summary.red }}</p>
+                                <p style="color: #a0aab5; font-size: 0.9rem;">Critical Risk</p>
+                            </div>
+                            <div class="hazard-card" style="border-left: 4px solid #fd7e14; background: rgba(253, 126, 20, 0.08);">
+                                <span class="badge" style="background: #fd7e14; color: white;">ORANGE</span>
+                                <p style="color: #e8f0f5; font-weight: 700;">{{ hazard_summary.orange }}</p>
+                                <p style="color: #a0aab5; font-size: 0.9rem;">High Risk</p>
+                            </div>
+                            <div class="hazard-card" style="border-left: 4px solid #f0ad4e; background: rgba(240, 173, 78, 0.08);">
+                                <span class="badge" style="background: #f0ad4e; color: white;">AMBER</span>
+                                <p style="color: #e8f0f5; font-weight: 700;">{{ hazard_summary.amber }}</p>
+                                <p style="color: #a0aab5; font-size: 0.9rem;">Elevated Risk</p>
+                            </div>
+                            <div class="hazard-card" style="border-left: 4px solid #ffc107; background: rgba(255, 193, 7, 0.08);">
+                                <span class="badge" style="background: #ffc107; color: #000;">YELLOW</span>
+                                <p style="color: #e8f0f5; font-weight: 700;">{{ hazard_summary.yellow }}</p>
+                                <p style="color: #a0aab5; font-size: 0.9rem;">Moderate Risk</p>
+                            </div>
+                            <div class="hazard-card" style="border-left: 4px solid #28a745; background: rgba(40, 167, 69, 0.08);">
+                                <span class="badge" style="background: #28a745; color: white;">GREEN</span>
+                                <p style="color: #e8f0f5; font-weight: 700;">{{ hazard_summary.green }}</p>
+                                <p style="color: #a0aab5; font-size: 0.9rem;">Low Risk</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter"></i> Advanced Filtering</h5>
+                    </div>
+                    <div class="card-body filter-panel">
+                        <form method="get" class="advanced-filter-form">
+                            {{ filter_form.non_field_errors }}
+                            <input type="hidden" name="scroll" id="scroll-target" value="">
+                            <div class="filter-grid">
+                                <div class="filter-field filter-field-wide">
+                                    <label for="{{ filter_form.search.id_for_label }}">Search</label>
+                                    {{ filter_form.search }}
+                                    {% if filter_form.search.errors %}
+                                    <div class="filter-errors">{{ filter_form.search.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <fieldset class="filter-field filter-field-wide">
+                                    <legend>Incident Type</legend>
+                                    <div class="filter-checks">
+                                        {% for choice in filter_form.incident_type %}
+                                        <label class="filter-check">
+                                            {{ choice.tag }}
+                                            <span>{{ choice.choice_label }}</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% if filter_form.incident_type.errors %}
+                                    <div class="filter-errors">{{ filter_form.incident_type.errors }}</div>
+                                    {% endif %}
+                                </fieldset>
+
+                                <fieldset class="filter-field filter-field-wide">
+                                    <legend>Status</legend>
+                                    <div class="filter-checks">
+                                        {% for choice in filter_form.status %}
+                                        <label class="filter-check">
+                                            {{ choice.tag }}
+                                            <span>{{ choice.choice_label }}</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% if filter_form.status.errors %}
+                                    <div class="filter-errors">{{ filter_form.status.errors }}</div>
+                                    {% endif %}
+                                </fieldset>
+
+                                <div class="filter-field">
+                                    <label>Priority Range</label>
+                                    <div class="filter-range">
+                                        <div>
+                                            {{ filter_form.priority_min }}
+                                            {% if filter_form.priority_min.errors %}
+                                            <div class="filter-errors">{{ filter_form.priority_min.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            {{ filter_form.priority_max }}
+                                            {% if filter_form.priority_max.errors %}
+                                            <div class="filter-errors">{{ filter_form.priority_max.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="filter-field">
+                                    <label for="{{ filter_form.date_from.id_for_label }}">Date From</label>
+                                    {{ filter_form.date_from }}
+                                    {% if filter_form.date_from.errors %}
+                                    <div class="filter-errors">{{ filter_form.date_from.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="filter-field">
+                                    <label for="{{ filter_form.date_to.id_for_label }}">Date To</label>
+                                    {{ filter_form.date_to }}
+                                    {% if filter_form.date_to.errors %}
+                                    <div class="filter-errors">{{ filter_form.date_to.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="filter-actions">
+                                <div class="filter-actions-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter"></i> Apply Filters
+                                    </button>
+                                    <a href="{% url 'dashboard' %}" class="btn" style="background: transparent; border: 1px solid #00bcd4; color: #00bcd4;">
+                                        <i class="fas fa-redo"></i> Reset
+                                    </a>
+                                </div>
+                                {% if user.is_superuser or user.role == 'admin' or user.role == 'dispatcher' %}
+                                <a href="{% url 'incident_create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> New Incident
+                                </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="recent-incidents" class="dashboard-card table-card">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Recent Incidents</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Location</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for incident in incidents %}
+                            <tr>
+                                <td style="color: #e8f0f5; font-weight: 600;">{{ incident.title }}</td>
+                                <td style="color: #a0aab5;">{{ incident.get_incident_type_display }}</td>
+                                <td>
+                                    <span class="badge badge-status" style="background: {% if incident.status == 'reported' %}#00bcd4{% elif incident.status == 'investigating' %}#ffc107{% elif incident.status == 'confirmed' %}#28a745{% else %}#6c757d{% endif %}; color: {% if incident.status == 'reported' %}#000{% else %}white{% endif %};">
+                                        {{ incident.get_status_display }}
+                                    </span>
+                                </td>
+                                <td style="color: #e8f0f5;">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= incident.priority %}
+                                            <i class="fas fa-star" style="color: #ffc107;"></i>
+                                        {% else %}
+                                            <i class="far fa-star" style="color: #a0aab5;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td style="color: #a0aab5; font-size: 0.9rem;">{{ incident.location_description|truncatewords:4 }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        {% if user.role != 'viewer' or incident.status == 'confirmed' or incident.status == 'investigating' or incident.status == 'resolved' or incident.reported_by.role == 'dispatcher' or incident.reported_by.role == 'admin' %}
+                                        <a href="{% url 'incident_detail' incident.pk %}" class="btn btn-sm" style="background: transparent; border: 1px solid #00bcd4; color: #00bcd4; padding: 0.35rem 0.85rem;">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% else %}
+                                        <span style="color: #a0aab5; font-size: 0.85rem;">Read-only</span>
+                                        {% endif %}
+                                        {% if user.is_superuser or user.role == 'admin' or user.role == 'dispatcher' %}
+                                        <a href="{% url 'incident_update' incident.pk %}" class="btn btn-sm" style="background: transparent; border: 1px solid #ffc107; color: #ffc107; padding: 0.35rem 0.85rem;">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: #a0aab5;">
+                                    <i class="fas fa-inbox"></i> No incidents found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('.advanced-filter-form');
+    var scrollInput = document.getElementById('scroll-target');
+    var recent = document.getElementById('recent-incidents');
+
+    // On submit, set the scroll flag so server returns it in the querystring
+    if (form) {
+        form.addEventListener('submit', function () {
+            if (scrollInput) scrollInput.value = '1';
+        });
+
+        // Only set scroll flag on explicit submit (Apply Filters)
+    }
+
+    // After page load, if the query contained the scroll flag, smoothly scroll to recent incidents
+    try {
+        var params = new URLSearchParams(window.location.search);
+        if ((params.get('scroll') === '1' || window.location.hash === '#recent-incidents') && recent) {
+            // give the page a moment to render then scroll
+            setTimeout(function () {
+                recent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 120);
+
+            // remove the scroll parameter from the URL to keep it clean
+            if (params.has('scroll')) {
+                params.delete('scroll');
+                var base = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+                history.replaceState({}, document.title, base);
+            }
+        }
+    } catch (e) {
+        // no-op on older browsers
+        console.warn('Scroll-to-recent handler error', e);
+    }
+});
+</script>
+
+{% endblock %}

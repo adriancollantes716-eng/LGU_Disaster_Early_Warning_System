@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login - Municipality of Carigara, Leyte{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row gy-4 justify-content-center">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-lg" style="background: rgba(15,20,25,0.16); border: 1px solid rgba(0,188,212,0.10); backdrop-filter: blur(6px); transform: translateY(-2px); margin: 0.5rem;">
+                <div class="card-header" style="background: rgba(15,20,25,0.24); border-bottom: 1px solid rgba(0,188,212,0.10); padding: 2rem; backdrop-filter: blur(6px);">
+                    <h2 class="mb-1" style="color: #00bcd4; font-weight: 700;"><i class="fas fa-lock-open"></i> Login</h2>
+                    <p class="mb-0 text-muted">Sign in to your Municipality of Carigara, Leyte account</p>
+                </div>
+                <div class="card-body p-4">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert" style="background: rgba(255,107,107,0.12); border-left: 4px solid #ff6b6b; color: #ff6b6b;">
+                        <strong>Login Error</strong>
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if axes_locked_message %}
+                    <div class="alert alert-warning" role="alert" style="background: rgba(255,193,7,0.12); border-left: 4px solid #ffc107; color: #ffc107;">
+                        <h5 class="mb-2"><i class="fas fa-exclamation-triangle"></i> Account Locked</h5>
+                        <p class="mb-1">{{ axes_locked_message }}</p>
+                        <p class="mb-0"><strong>Next step:</strong> <a href="{% url 'password_reset' %}" class="text-primary">Reset your password</a></p>
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Username</label>
+                            <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                id="id_username" name="username" placeholder="Enter your username" required>
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <div class="password-toggle-wrapper" style="position: relative;">
+                                <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                    id="id_password" name="password" placeholder="Enter your password" required>
+                                <button type="button" class="btn password-toggle" style="position: absolute; top: 50%; right: 0.75rem; transform: translateY(-50%); border: none; background: transparent; color: rgba(255,255,255,0.75);">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback">{{ form.password.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'password_reset' %}" class="text-primary">Forgot password?</a>
+                    </div>
+                    <p class="text-center mt-3 text-muted">Don't have an account? <a href="{% url 'register' %}" class="text-primary">Create one</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-lg" style="background: rgba(15,20,25,0.12); border: 1px solid rgba(0,188,212,0.10); backdrop-filter: blur(6px); transform: translateY(-2px); margin: 0.5rem;">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Secure access for Carigara officials</h4>
+                    <p class="text-muted mb-4">Access the alert dashboard, incident reports, and early warning controls from one secure portal.</p>
+                    <ul class="list-unstyled text-muted" style="line-height: 1.8;">
+                        <li><i class="fas fa-check-circle text-primary me-2"></i> Brute-force protection with Django-Axes</li>
+                        <li><i class="fas fa-check-circle text-primary me-2"></i> Role-based access for admins and dispatchers</li>
+                        <li><i class="fas fa-check-circle text-primary me-2"></i> Quick incident creation and response tracking</li>
+                        <li><i class="fas fa-check-circle text-primary me-2"></i> Built-in password reset workflow</li>
+                    </ul>
+                    <div class="mt-4">
+                        <div class="small text-muted">Need assistance? Contact your local IT administrator for account setup.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

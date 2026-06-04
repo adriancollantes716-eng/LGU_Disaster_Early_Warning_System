@@ -1,0 +1,12 @@
+Incident: {{ incident.title }}
+Status changed from: {{ old_status }}
+New status: {{ incident.get_status_display }}
+
+Priority: {{ incident.priority }}
+Type: {{ incident.get_incident_type_display }}
+Reported by: {% if reported_by %}{{ reported_by.get_full_name|default:reported_by.username }}{% else %}Unknown{% endif %}
+
+{% if incident_url %}View incident: {{ incident_url }}
+{% endif %}
+
+Please log in to the incident management system for details.
