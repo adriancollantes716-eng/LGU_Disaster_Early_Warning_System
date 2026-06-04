@@ -19,7 +19,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        value: "postgresql://ews_db_qrmg_user:4ZAHm8Dqw95FhHYOceYc45nIhHsfQ0Pi@dpg-d8grgcmk1jcs73dblndg-a.oregon-postgres.render.com/ews_db_qrmg"
+        fromDatabase:
+          name: "ews.db"
+          property: connectionString
       - key: ALLOWED_HOSTS
         value: "lgu-disaster-early-warning-system.onrender.com"
       - key: CSRF_TRUSTED_ORIGINS
