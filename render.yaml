@@ -1,15 +1,16 @@
 databases:
-  - name: carigara-ew-db
-    databaseName: carigara_ew
+  - name: "ews.db"
+    databaseName: "ews.db"
     user: carigara_ew
 
 services:
   - type: web
-    name: carigara-ew-leyte
+    name: "LGU_Disaster_Early_Warning_System"
     runtime: python
     plan: free
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "python manage.py migrate --noinput && python setup_demo_data.py && gunicorn carigara.wsgi:application --bind 0.0.0.0:$PORT"
+    releaseCommand: "python manage.py migrate --noinput && python setup_demo_data.py"
+    startCommand: "gunicorn carigara.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.5
@@ -18,18 +19,18 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: carigara-ew-db
-          property: connectionString
+        value: "postgresql://ews_db_qrmg_user:4ZAHm8Dqw95FhHYOceYc45nIhHsfQ0Pi@dpg-d8grgcmk1jcs73dblndg-a.oregon-postgres.render.com/ews_db_qrmg"
       - key: ALLOWED_HOSTS
-        value: ".onrender.com"
+        value: "lgu-disaster-early-warning-system.onrender.com"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://carigara-ew-leyte.onrender.com"
+        value: "https://lgu-disaster-early-warning-system.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://carigara-ew-leyte.onrender.com"
+        value: "https://lgu-disaster-early-warning-system.onrender.com"
+      - key: RENDER_EXTERNAL_HOSTNAME
+        value: "lgu-disaster-early-warning-system.onrender.com"
       - key: CLOUDINARY_CLOUD_NAME
-        value: "dpjhmjhtv"
+        value: "dlpckajkv"
       - key: CLOUDINARY_API_KEY
-        sync: false
+        value: "414391913879861"
       - key: CLOUDINARY_API_SECRET
-        sync: false
+        value: "yejti25Sp6NFWjbe4vwR_NJEibQ"
